@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat|Raleway&display=swap" rel="stylesheet">
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/gltf_validator.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="babylon.glTF2FileLoader.js"></script>
+        <script src="babylon.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas">
+        <button id ="ShowHidemyMeshTwo" onClick = funtion()></button>
+    </canvas>
+
+    <script>
+        var canvas = document.querySelector("#renderCanvas");
+
+        var createScene = function () {
+
+        // Create the scene space
+        var scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3.White();
+        // Add a camera to the scene and attach it to the canvas
+        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, -Math.PI / 2, 100, BABYLON.Vector3(1,0,1), scene);
+            camera.attachControl(canvas, true);
+            camera.setPosition(new BABYLON.Vector3(-2 ,2,-2));
+            camera.lowerRadiusLimit = 3;
+            camera.upperRadiusLimit = 3;
+        //adding lights
+        var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 10, 0), scene);
+        var light2 = new BABYLON.PointLight("light1", new BABYLON.Vector3(0, 5, 0), scene);
+
+            light1.diffuseColor = new BABYLON.Color3.White();
+            light2.diffuseColor = new BABYLON.Color3.White();
+            light1.intensity = 1;
+
+        //Ground
+        var ground = BABYLON.MeshBuilder.CreateGround("myGround", {width: 100, height: 100, subdivisions: 4}, scene);
+            ground.position = new BABYLON.Vector3(0,0,0);
+        var groundMaterial = new BABYLON.StandardMaterial("ground Material", scene);
+            groundMaterial.diffuseColor = new BABYLON.Color3.White();
+            groundMaterial.specularColor = new BABYLON.Color3.Black();
+            ground.material = groundMaterial;
+
+        var selectedMesh;
+
+        //Model 1
+        var chair, cushion, chairSupport1,chairSupport2, chairSupport3;
+
+        //Model 2
+        var chair2;
+
+            //cushion variables
+            var cushionButton = BABYLON.GUI.Button.CreateImageWithCenterTextButton("cushion button", "Cushion Textures");
+                cushionButton.width = "150px";
+                cushionButton.height = "40px";
+                cushionButton.color = "black";
+                cushionButton.top = "-40%";
+                cushionButton.left = "-29%";
+                cushionButton.background = "#e5e5e5";
+                cushionButton.cornerRadius = 5;
+
+                cushionButton.onPointerEnterObservable.add(function() {
+                    cushionButton.background = "grey";
+                });
+
+                cushionButton.onPointerOutObservable.add(function() {
+                    cushionButton.background = "#e5e5e5";
+                });
+                //Denim Fabric
+                var cushionMat1 = new BABYLON.StandardMaterial("cushion Material1", scene);
+                    cushionMat1.diffuseTexture = new BABYLON.Texture("./img/denim_.jpg", scene);
+                    cushionMat1.specularColor = new BABYLON.Color3(0, 0, 0);
+                    cushionMat1.diffuseTexture.uScale = 8;
+                    cushionMat1.diffuseTexture.vScale = 8;
+
+                var butFabric1 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Fabric button","","./img/denim_.jpg");
+                    butFabric1.width = "80px";
+                    butFabric1.height = "80px";
+                    butFabric1.top = "40%";
+                    butFabric1.left = "5%";
+                    butFabric1.cornerRadius = 5;
+
+                    butFabric1.onPointerClickObservable.add(function(){
+                            if(butFabric1){
+                                cushion.material = cushionMat1;
+                            }
+                        });
+
+                //Pattern Fabric
+                var cushionMat2 = new BABYLON.StandardMaterial("cushion Material1", scene);
+                    cushionMat2.diffuseTexture = new BABYLON.Texture("./img/pattern_.jpg", scene);
+                    cushionMat2.specularColor = new BABYLON.Color3(0, 0, 0);
+                    cushionMat2.diffuseTexture.uScale = 6;
+                    cushionMat2.diffuseTexture.vScale = 6;
+                //Button for Pattern Fabric
+                var butFabric2 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Fabric button","","./img/pattern_.jpg");
+                    butFabric2.width = "80px";
+                    butFabric2.height = "80px";
+                    butFabric2.top = "40%";
+                    butFabric2.left = "10%";
+                    butFabric2.cornerRadius = 5;
+
+                    butFabric2.onPointerEnterObservable.add(function() {
+                        butFabric2.background = "yellow";
+                    });
+
+                    butFabric2.onPointerOutObservable.add(function() {
+                        butFabric2.background = null;
+                    });
+
+                        butFabric2.onPointerClickObservable.add(function(){
+                            if(butFabric2){
+                                cushion.material = cushionMat2;
+                            }
+                        });
+
+                //Brown Fabric
+                var cushionMat3 = new BABYLON.StandardMaterial("cushion Material1", scene);
+                    cushionMat3.diffuseTexture = new BABYLON.Texture("./img/brownfabric.jpg", scene);
+                    cushionMat3.specularColor = new BABYLON.Color3(0, 0, 0);
+                    cushionMat3.diffuseTexture.uScale = 8;
+                    cushionMat3.diffuseTexture.vScale = 8;
+
+                //Button for Brown Fabric
+                var butFabric3 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Fabric button","","./img/brownfabric.jpg");
+                    butFabric3.width = "80px";
+                    butFabric3.height = "80px";
+                    butFabric3.top = "40%";
+                    butFabric3.left = "15%";
+                    butFabric3.cornerRadius = 5;
+
+                    butFabric3.onPointerEnterObservable.add(function() {
+                        butFabric3.background = "yellow";
+                    });
+
+                    butFabric3.onPointerOutObservable.add(function() {
+                        butFabric3.background = null;
+                    });
+
+                    butFabric3.onPointerClickObservable.add(function(){
+                        if(butFabric3){
+                            cushion.material = cushionMat3;
+                        }
+                    });
+
+                //Quilt Fabric
+                var cushionMat4 = new BABYLON.StandardMaterial("cushion Material1", scene);
+                    cushionMat4.diffuseTexture = new BABYLON.Texture("./img/quilt_.jpg", scene);
+                    cushionMat4.specularColor = new BABYLON.Color3(0, 0, 0);
+                    cushionMat4.diffuseTexture.uScale = 8;
+                    cushionMat4.diffuseTexture.vScale = 8;
+
+                //Button for Quilt Fabric
+                var butFabric4 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Fabric button","","./img/quilt_.jpg");
+                    butFabric4.width = "80px";
+                    butFabric4.height = "80px";
+                    butFabric4.top = "40%";
+                    butFabric4.left = "20%";
+                    butFabric4.cornerRadius = 5;
+
+                    butFabric4.onPointerEnterObservable.add(function() {
+                        butFabric4.background = "yellow";
+                    });
+
+                    butFabric4.onPointerOutObservable.add(function() {
+                        butFabric4.background = null;
+                    });
+
+                    butFabric4.onPointerClickObservable.add(function(){
+                        if(butFabric4){
+                            cushion.material = cushionMat4;
+                        }
+                    });
+
+            //Chair Materials
+            //button to select chair structure and change colors
+            var chairButton = BABYLON.GUI.Button.CreateImageWithCenterTextButton("chair button", "Chair Textures");
+                chairButton.width = "150px";
+                chairButton.height = "40px";
+                chairButton.color = "black";
+                chairButton.top = "-40%";
+                chairButton.left = "-40%";
+                chairButton.background = "#e5e5e5";
+                chairButton.cornerRadius = 5;
+
+                chairButton.onPointerEnterObservable.add(function() {
+                    chairButton.background = "grey";
+                });
+
+                chairButton.onPointerOutObservable.add(function() {
+                    chairButton.background = "#e5e5e5";
+                });
+
+            //first wood material
+            var chairMaterial1 = new BABYLON.StandardMaterial("chair Material", scene);
+                chairMaterial1.diffuseTexture = new BABYLON.Texture("./img/wood_.jpg", scene);
+                chairMaterial1.specularColor = new BABYLON.Color3(0, 0, 0);
+                chairMaterial1.diffuseTexture.uScale = 2;
+                chairMaterial1.diffuseTexture.vScale = 2;
+
+                //button for first wood material
+                var butWood1 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Wood button","","./img/wood_.jpg");
+                    butWood1.width = "80px";
+                    butWood1.height = "80px";
+                    butWood1.top = "40%";
+                    butWood1.left = "-5%";
+                    butWood1.cornerRadius = 5;
+
+                    butWood1.onPointerEnterObservable.add(function() {
+                        butWood1.background = "yellow";
+                    });
+
+                    butWood1.onPointerOutObservable.add(function() {
+                        butWood1.background = null;
+                    });
+
+                    butWood1.onPointerClickObservable.add(function(){
+                        if(butWood1){
+                            chair.material = chairMaterial1;
+                            chairSupport1.material = chairMaterial1;
+                            chairSupport2.material = chairMaterial1;
+                            chairSupport3.material = chairMaterial1;
+
+                            chair2.material = chairMaterial1;
+
+                        }
+                    });
+                //second wood material
+                var chairMaterial2 = new BABYLON.StandardMaterial("chair Material", scene);
+                    chairMaterial2.diffuseTexture = new BABYLON.Texture("./img/wood texture3.jpg", scene);
+                    chairMaterial2.specularColor = new BABYLON.Color3(0, 0, 0);
+                    chairMaterial2.diffuseTexture.uScale = 2;
+                    chairMaterial2.diffuseTexture.vScale = 2;
+
+                //button for second wood material
+                var butWood2 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Wood button","","./img/wood texture3.jpg");
+                    butWood2.width = "80px";
+                    butWood2.height = "80px";
+                    butWood2.top = "40%";
+                    butWood2.left = "-10%";
+                    butWood2.cornerRadius = 5;
+
+                    butWood2.onPointerEnterObservable.add(function() {
+                        butWood2.background = "yellow";
+                    });
+
+                    butWood2.onPointerOutObservable.add(function() {
+                        butWood2.background = null;
+                    });
+
+                    butWood2.onPointerClickObservable.add(function(){
+                        if(butWood2){
+                            chair.material = chairMaterial2;
+                            chairSupport1.material = chairMaterial2;
+                            chairSupport2.material = chairMaterial2;
+                            chairSupport3.material = chairMaterial2;
+
+                            chair2.material = chairMaterial2;
+                        }
+                    });
+                //third wood material
+                var chairMaterial3 = new BABYLON.StandardMaterial("chair Material", scene);
+                    chairMaterial3.diffuseTexture = new BABYLON.Texture("./img/wood texture2.jpg", scene);
+                    chairMaterial3.specularColor = new BABYLON.Color3(0, 0, 0);
+                    chairMaterial3.diffuseTexture.uScale = 2;
+                    chairMaterial3.diffuseTexture.vScale = 2;
+
+                //button for third wood material
+                var butWood3 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Wood button","","./img/wood texture2.jpg");
+                    butWood3.width = "80px";
+                    butWood3.height = "80px";
+                    butWood3.top = "40%";
+                    butWood3.left = "-15%";
+                    butWood3.cornerRadius = 5;
+
+                    butWood3.onPointerEnterObservable.add(function() {
+                        butWood3.background = "yellow";
+                    });
+
+                    butWood3.onPointerOutObservable.add(function() {
+                        butWood3.background = null;
+                    });
+
+                    butWood3.onPointerClickObservable.add(function(){
+                        if(butWood3){
+                            chair.material = chairMaterial3;
+                            chairSupport1.material = chairMaterial3;
+                            chairSupport2.material = chairMaterial3;
+                            chairSupport3.material = chairMaterial3;
+
+                            chair2.material = chairMaterial3;
+
+                            }
+                        });
+                //Fourth wood material
+                var chairMaterial4 = new BABYLON.StandardMaterial("chair Material", scene);
+                    chairMaterial4.diffuseTexture = new BABYLON.Texture("./img/wood texture4.jpg", scene);
+                    chairMaterial4.specularColor = new BABYLON.Color3(0, 0, 0);
+                    chairMaterial4.diffuseTexture.uScale = 2;
+                    chairMaterial4.diffuseTexture.vScale = 2;
+
+                    //button for third wood material
+                var butWood4 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Wood button","","./img/wood texture4.jpg");
+                    butWood4.width = "80px";
+                    butWood4.height = "80px";
+                    butWood4.top = "40%";
+                    butWood4.left = "-20%";
+                    butWood4.cornerRadius = 5;
+
+                    butWood4.onPointerEnterObservable.add(function() {
+                        butWood4.background = "yellow";
+                    });
+
+                    butWood4.onPointerOutObservable.add(function() {
+                        butWood4.background = null;
+                    });
+
+                    butWood4.onPointerClickObservable.add(function(){
+                        if(butWood4){
+                            chair.material = chairMaterial4;
+                            chairSupport1.material = chairMaterial4;
+                            chairSupport2.material = chairMaterial4;
+                            chairSupport3.material = chairMaterial4;
+
+                            chair2.material = chairMaterial4;
+
+                            }
+                        });
+
+        //Model2
+
+        //Adding button to add walls
+        var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI");
+        var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        var model1 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Chair model1", "", "./icon_chair/iso.PNG");
+            model1.width = "80px";
+            model1.height = "80px";
+           //chairModel1.color = "black";
+            model1.top = "-7%";
+            model1.left = "38%";
+            model1.background = "transparent";
+            model1.cornerRadius = 5;
+
+            advancedTexture.addControl(model1);
+
+            model1.onPointerClickObservable.add(function(){
+                if(model1){
+
+                //onload Chair mesh
+                BABYLON.SceneLoader.ImportMesh(null,"./","gltf/chair.glb",scene,function (mesh) {
+                     chair = mesh[0].getChildMeshes()[0];
+                     cushion = mesh[0].getChildMeshes()[1];
+                     chairSupport1 = mesh[0].getChildMeshes()[2];
+                     chairSupport2 = mesh[0].getChildMeshes()[3];
+                     chairSupport3 = mesh[0].getChildMeshes()[4];
+                     chairSupport4 = mesh[0].getChildMeshes()[5];
+
+               /* //merge meshes
+                chairModel1 = BABYLON.Mesh.MergeMeshes([chair, chairSupport1, chairSupport2, chairSupport3, chairSupport4], true, true, undefined, false, true);*/
+
+                //Chair position
+                    chair.position = new BABYLON.Vector3(0, 0, 0);
+                    cushion.position = new BABYLON.Vector3(0, 0, 0);
+
+                //button to select cushion and change colors
+                    cushionButton.onPointerClickObservable.add(function(){
+                        if(cushionButton){
+
+                    //cushion materials
+                        //Button for Fabric Denim
+                            advancedTexture.addControl(butFabric1);
+                        //Button for Pattern Fabric
+                            advancedTexture.addControl(butFabric2);
+                        //Button for Brown Fabric
+                            advancedTexture.addControl(butFabric3);
+                        //Button for Quilt Fabric
+                            advancedTexture.addControl(butFabric4);
+
+                        }
+                    });
+
+                    advancedTexture.addControl(cushionButton);
+
+                    chairButton.onPointerClickObservable.add(function(){
+                        if(chairButton){
+
+                            //wood texture 1
+                            advancedTexture.addControl(butWood1);
+                            //wood texture 2
+                            advancedTexture.addControl(butWood2);
+                            //wood texture 3
+                            advancedTexture.addControl(butWood3);
+                            //wood texture 4
+                            advancedTexture.addControl(butWood4);
+
+                        }
+                    });
+
+                    advancedTexture.addControl(chairButton);
+
+                    //remove previously added mesh
+                    if(chair2){
+                        chair2.dispose();
+                        chair2 = null;
+                    }
+
+                    });
+
+                };
+            });
+
+        var model2 = BABYLON.GUI.Button.CreateImageWithCenterTextButton("Chair model2", "", "./icon_chair/iso2.PNG");
+            model2.width = "80px";
+            model2.height = "80px";
+           //chairModel1.color = "black";
+            model2.top = "7%";
+            model2.left = "38%";
+            model2.background = "transparent";
+            model2.cornerRadius = 5;
+
+            advancedTexture.addControl(model2);
+
+            model2.onPointerClickObservable.add(function(){
+                if(model2){
+                   //onload Chair mesh
+                    BABYLON.SceneLoader.ImportMesh(null,"./","gltf/chair2.glb",scene,function (chairModel2) {
+                    chair2 = chairModel2[0].getChildMeshes()[0];
+
+                    advancedTexture.removeControl(butFabric1);
+                    advancedTexture.removeControl(butFabric2);
+                    advancedTexture.removeControl(butFabric3);
+                    advancedTexture.removeControl(butFabric4);
+
+                    advancedTexture.removeControl(cushionButton);
+
+                    chairButton.onPointerClickObservable.add(function(){
+                        if(chairButton){
+
+                        //wood texture 1
+                        butWood1.onPointerClickObservable.add(function(){
+                        if(butWood1){
+                            chair2.material = chairMaterial1;
+                        }
+                    });
+                        advancedTexture.addControl(butWood1);
+                            //wood texture 2
+                            advancedTexture.addControl(butWood2);
+                            //wood texture 3
+                            advancedTexture.addControl(butWood3);
+                            //wood texture 4
+                            advancedTexture.addControl(butWood4);
+
+                        }
+                    });
+
+                    advancedTexture.addControl(chairButton);
+
+                    //remove model 1
+                    if ({chair,cushion,chairSupport1,chairSupport2,chairSupport3}){
+                        chair.dispose();
+                        cushion.dispose();
+                        chairSupport1.dispose();
+                        chairSupport2.dispose();
+                        chairSupport3.dispose();
+                        chair = null;
+                        cushion = null;
+                        chairSupport1 = null;
+                        chairSupport2 = null;
+                        chairSupport3 = null;
+
+                }
+
+                });
+
+            }
+
+        });
+
+        // Button for Plan
+        var butPlan = BABYLON.GUI.Button.CreateSimpleButton("butPlan", "Top View");
+            butPlan.width = "90px";
+            butPlan.height = "40px";
+            butPlan.color = "black";
+            butPlan.background = "#e5e5e5";
+            butPlan.left = "42%";
+            butPlan.top = "-40%";
+            butPlan.cornerRadius = 5;
+            //color change on hover
+            butPlan.onPointerEnterObservable.add(function() {
+                butPlan.background = "grey";
+            });
+            butPlan.onPointerOutObservable.add(function() {
+                butPlan.background = "#e5e5e5";
+            });
+            var showPlan = 0;
+            butPlan.onPointerClickObservable.add(function(){
+                showPlan++;
+                if (showPlan % 1 == 0){
+                    camera.setPosition(new BABYLON.Vector3(0,5,0));
+                }
+            });
+            advancedTexture.addControl(butPlan);
+
+        //Button for isometric view
+        var butIso = BABYLON.GUI.Button.CreateSimpleButton("butIso", "Iso View");
+            butIso.width = "90px";
+            butIso.height = "40px";
+            butIso.color = "black";
+            butIso.left = "35%";
+            butIso.top = "-40%";
+            butIso.background = "#e5e5e5";
+            butIso.cornerRadius = 5;
+            //color change on hover
+            butIso.onPointerEnterObservable.add(function() {
+                butIso.background = "grey";
+            });
+            butIso.onPointerOutObservable.add(function() {
+                butIso.background = "#e5e5e5";
+            });
+            var showIso = 0;
+            butIso.onPointerClickObservable.add(function(){
+                showIso++;
+                if (showIso % 1 == 0){
+                    camera.setPosition(new BABYLON.Vector3(-2 ,2,-2));
+                }
+            });
+
+            advancedTexture.addControl(butIso);
+
+        //DOM event
+      canvas.addEventListener("click", function(e) {
+          var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+
+           if(pickResult.hit) {
+               if(selectedMesh) {
+                 selectedMesh.visibility = 1.0;
+                }
+                selectedMesh = pickResult.pickedMesh;
+
+                selectedMesh.visibility = 0.8;
+              /*  if (selectedMesh === cushion){
+                    advancedTexture.addControl(butFabric1);
+                    }*/
+            }
+        });
+
+        return scene;
+
+        };
+        __createScene = createScene;
+
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+        var scene = createScene();
+
+            engine.runRenderLoop(function () {
+                if (scene) {
+                    scene.render();
+                }
+            });
+
+            // Resize
+            window.addEventListener("resize", function () {
+                engine.resize();
+            });
+
+    </script>
+</body>
+</html>
